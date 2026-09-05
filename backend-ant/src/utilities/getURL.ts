@@ -8,7 +8,8 @@ export const getServerSideURL = () => {
   }
 
   if (!url) {
-    url = 'http://localhost:3000'
+    // Fallback dla Rendera (lub domyślny URL produkcyjny)
+    url = process.env.RENDER_EXTERNAL_URL || 'https://backend-ant.onrender.com'
   }
 
   return url
@@ -27,5 +28,9 @@ export const getClientSideURL = () => {
     return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
   }
 
-  return process.env.NEXT_PUBLIC_SERVER_URL || ''
+  return (
+    process.env.NEXT_PUBLIC_SERVER_URL ||
+    process.env.RENDER_EXTERNAL_URL ||
+    'https://backend-ant.onrender.com'
+  )
 }
