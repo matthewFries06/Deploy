@@ -40,8 +40,9 @@ export default buildConfig({
   collections: [Users, Pages, Categories, Media],
   db: sqliteAdapter({
     client: {
-      url: process.env.DATABASE_URL || '',
+      url: process.env.DATABASE_URL || 'file:.payload.db',
     },
+    push: true,
   }),
   editor: lexicalEditor({
     features: () => {
