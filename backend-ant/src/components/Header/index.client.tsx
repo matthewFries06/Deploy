@@ -17,7 +17,7 @@ type Props = {
 }
 
 export function HeaderClient({ header }: Props) {
-  const menu = header.navItems || []
+  const menu = header?.navItems || []
   const pathname = usePathname()
 
   return (
