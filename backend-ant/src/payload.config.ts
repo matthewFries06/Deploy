@@ -28,11 +28,7 @@ const dirname = path.dirname(filename)
 export default buildConfig({
   admin: {
     components: {
-      // The `BeforeLogin` component renders a message that you see while logging into your admin panel.
-      // Feel free to delete this at any time. Simply remove the line below and the import `BeforeLogin` statement on line 15.
       beforeLogin: ['@/components/BeforeLogin#BeforeLogin'],
-      // The `BeforeDashboard` component renders the 'welcome' block that you see after logging into your admin panel.
-      // Feel free to delete this at any time. Simply remove the line below and the import `BeforeDashboard` statement on line 15.
       beforeDashboard: ['@/components/BeforeDashboard#BeforeDashboard'],
     },
     user: Users.slug,
@@ -40,7 +36,8 @@ export default buildConfig({
   collections: [Users, Pages, Categories, Media],
   db: sqliteAdapter({
     client: {
-      url: process.env.DATABASE_URL || 'file:.payload.db',
+      // Jeśli brak DATABASE_URL w env, zapisuje w lokalnym folderze roboczym na bezwzględnej ścieżce
+      url: process.env.DATABASE_URL || `file:${path.resolve(dirname, 'payload.db')}`,
     },
     push: true,
   }),
@@ -79,16 +76,12 @@ export default buildConfig({
       ]
     },
   }),
-  //email: nodemailerAdapter(),
   endpoints: [],
   globals: [Header, Footer],
   plugins,
-  secret: process.env.PAYLOAD_SECRET || '',
+  // Zabezpieczenie przed pustym ciągiem znaków
+  secret: process.env.PAYLOAD_SECRET || 'fallback-secret-key-change-in-production',
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
-  // Sharp is now an optional dependency -
-  // if you want to resize images, crop, set focal point, etc.
-  // make sure to install it and pass it to the config.
-  // sharp,
 })
