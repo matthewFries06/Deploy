@@ -23,21 +23,20 @@ type Args = {
 export default async function Page({ params }: Args) {
   const { slug = 'home' } = await params
 
-  // 1. BLOKADA BŁĘDU 500: Jeśli zapytanie dotyczy pliku statycznego (np. favicon.ico),
-  // nie pyta bazy danych tylko od razu zwraca 404
+  // 1. Zabezpieczenie przed zapytaniami o pliki statyczne (.ico, .png, .svg itp.)
   if (slug.includes('.')) {
     return notFound()
   }
 
-  const url = '/' + slug
+  let page = await queryPageBySlug({ slug })
 
-  let page = await queryPageBySlug({
-    slug,
-  })
-
-  // Remove this code once your website is seeded
+  // Dane statyczne gdy baza jest jeszcze nowa/pusta
   if (!page && slug === 'home') {
-    page = homeStaticData() as Page
+    try {
+      page = homeStaticData() as Page
+    } catch {
+      page = null
+    }
   }
 
   if (!page) {
@@ -57,40 +56,46 @@ export default async function Page({ params }: Args) {
 export async function generateMetadata({ params }: Args): Promise<Metadata> {
   const { slug = 'home' } = await params
 
-  // 2. BLOKADA BŁĘDU METADANYCH dla plików z kropką
   if (slug.includes('.')) {
     return {}
   }
 
-  const page = await queryPageBySlug({
-    slug,
-  })
-
-  return generateMeta({ doc: page })
+  try {
+    const page = await queryPageBySlug({ slug })
+    return generateMeta({ doc: page })
+  } catch (error) {
+    console.error('Błąd podczas generowania metadanych:', error)
+    return {}
+  }
 }
 
 const queryPageBySlug = async ({ slug }: { slug: string }) => {
-  const { isEnabled: draft } = await draftMode()
+  try {
+    const { isEnabled: draft } = await draftMode()
+    const payload = await getPayload({ config: configPromise })
 
-  const payload = await getPayload({ config: configPromise })
-
-  const result = await payload.find({
-    collection: 'pages',
-    draft,
-    limit: 1,
-    overrideAccess: draft,
-    pagination: false,
-    where: {
-      and: [
-        {
-          slug: {
-            equals: slug,
+    const result = await payload.find({
+      collection: 'pages',
+      draft,
+      limit: 1,
+      overrideAccess: draft,
+      pagination: false,
+      where: {
+        and: [
+          {
+            slug: {
+              equals: slug,
+            },
           },
-        },
-        ...(draft ? [] : [{ _status: { equals: 'published' } }]),
-      ],
-    },
-  })
+          ...(draft ? [] : [{ _status: { equals: 'published' } }]),
+        ],
+      },
+    })
 
-  return result.docs?.[0] || null
+    return result.docs?.[0] || null
+  } catch (error) {
+    // Przechwytujemy błędy braku tabeli/bazy, zapobiegając crashowi Reacta #441
+    console.error(`Nie udało się pobrać strony dla slug "${slug}":`, error)
+    return null
+  }
 }
