@@ -3,6 +3,7 @@ import { ProductGridItem } from '@/components/ProductGridItem'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import React from 'react'
+export const dynamic = 'force-dynamic'
 
 export const metadata = {
   description: 'Search for products in the store.',
