@@ -4,8 +4,19 @@ import './index.css'
 import { HeaderClient } from './index.client'
 
 export async function Header() {
-  const header = await getCachedGlobal('header', 1)()
-  const menu = header?.navItems || []
+  let header = null
 
-  return <HeaderClient header={header} />
+  try {
+    // Próbujemy pobrać dane z bazy/cache
+    header = await getCachedGlobal('header', 1)()
+  } catch (error) {
+    // Przechwytujemy błąd braku tabeli SQLite przy czystej bazie, 
+    // zapobiegając błędowi React #441
+    console.error('Błąd podczas pobierania Header z bazy:', error)
+  }
+
+  // Jeśli brak danych lub błąd, przekazujemy bezpieczny obiekt zastępczy
+  const fallbackHeader = header || { navItems: [] }
+
+  return <HeaderClient header={fallbackHeader} />
 }
