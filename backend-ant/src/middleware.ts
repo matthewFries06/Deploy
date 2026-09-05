@@ -8,8 +8,11 @@ export function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Ignoruj ścieżki systemowe Next.js oraz wszystkie zasoby z rozszerzeniem pliku (np. favicon.ico, .svg, .png)
+     * Ignoruj:
+     * - api, admin, _payload (ścieżki robocze Payload CMS)
+     * - _next/static, _next/image (pliki produkcyjne Next.js)
+     * - favicon i pliki statyczne z rozszerzeniami (.svg, .png, .ico itp.)
      */
-    '/((?!api|_next/static|_next/image|favicon\\.ico|favicon\\.svg|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
+    '/((?!admin|api|_payload|_next/static|_next/image|favicon\\.ico|favicon\\.svg|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
   ],
 }
