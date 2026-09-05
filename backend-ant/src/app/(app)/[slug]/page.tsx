@@ -11,31 +11,8 @@ import React from 'react'
 
 import type { Page } from '@/payload-types'
 import { notFound } from 'next/navigation'
+
 export const dynamic = 'force-dynamic'
-
-/*export async function generateStaticParams() {
-  const payload = await getPayload({ config: configPromise })
-  const pages = await payload.find({
-    collection: 'pages',
-    draft: false,
-    limit: 1000,
-    overrideAccess: false,
-    pagination: false,
-    select: {
-      slug: true,
-    },
-  })
-
-  const params = pages.docs
-    ?.filter((doc) => {
-      return doc.slug !== 'home'
-    })
-    .map(({ slug }) => {
-      return { slug }
-    })
-
-  return params
-}*/
 
 type Args = {
   params: Promise<{
@@ -45,6 +22,13 @@ type Args = {
 
 export default async function Page({ params }: Args) {
   const { slug = 'home' } = await params
+
+  // 1. BLOKADA BŁĘDU 500: Jeśli zapytanie dotyczy pliku statycznego (np. favicon.ico),
+  // nie pyta bazy danych tylko od razu zwraca 404
+  if (slug.includes('.')) {
+    return notFound()
+  }
+
   const url = '/' + slug
 
   let page = await queryPageBySlug({
@@ -72,6 +56,11 @@ export default async function Page({ params }: Args) {
 
 export async function generateMetadata({ params }: Args): Promise<Metadata> {
   const { slug = 'home' } = await params
+
+  // 2. BLOKADA BŁĘDU METADANYCH dla plików z kropką
+  if (slug.includes('.')) {
+    return {}
+  }
 
   const page = await queryPageBySlug({
     slug,
