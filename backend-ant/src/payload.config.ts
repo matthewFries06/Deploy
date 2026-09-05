@@ -27,17 +27,19 @@ const dirname = path.dirname(filename)
 
 export default buildConfig({
   admin: {
-    components: {
-      beforeLogin: ['@/components/BeforeLogin#BeforeLogin'],
-      beforeDashboard: ['@/components/BeforeDashboard#BeforeDashboard'],
-    },
+    // Zakomentowane na czas pierwszego uruchomienia.
+    // Niestandardowe komponenty podpięte pod widoki logowania bardzo często powodują React Error #441.
+    // components: {
+    //   beforeLogin: ['@/components/BeforeLogin#BeforeLogin'],
+    //   beforeDashboard: ['@/components/BeforeDashboard#BeforeDashboard'],
+    // },
     user: Users.slug,
   },
   collections: [Users, Pages, Categories, Media],
   db: sqliteAdapter({
     client: {
-      // Jeśli brak DATABASE_URL w env, zapisuje w lokalnym folderze roboczym na bezwzględnej ścieżce
-      url: process.env.DATABASE_URL || `file:${path.resolve(dirname, 'payload.db')}`,
+      // Jeśli brak DATABASE_URL, zapisuje bezpośrednio w katalogu /tmp, gdzie Node.js na Renderze ma pełne prawa zapisu
+      url: process.env.DATABASE_URL || 'file:/tmp/payload.db',
     },
     push: true,
   }),
@@ -79,7 +81,6 @@ export default buildConfig({
   endpoints: [],
   globals: [Header, Footer],
   plugins,
-  // Zabezpieczenie przed pustym ciągiem znaków
   secret: process.env.PAYLOAD_SECRET || 'fallback-secret-key-change-in-production',
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
