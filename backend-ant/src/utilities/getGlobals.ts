@@ -15,7 +15,11 @@ async function getGlobal<T extends Global>(slug: T, depth = 0) {
   })
 
   return global
-}
+} catch (error) {
+    // Zapobiega awarii budowania (build crash), gdy tabele w bazie jeszcze nie istnieją
+    console.warn(`[getGlobals] Could not fetch global for slug: ${String(slug)} during build.`)
+    return null
+  }
 
 /**
  * Returns a unstable_cache function mapped with the cache tag for the slug
