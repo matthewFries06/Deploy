@@ -7,28 +7,37 @@ import { FilterList } from './filter'
 import { CategoryItem } from './Categories.client'
 
 async function CategoryList() {
-  const payload = await getPayload({ config: configPromise })
+  try {
+    const payload = await getPayload({ config: configPromise })
 
-  const categories = await payload.find({
-    collection: 'categories',
-    sort: 'title',
-  })
+    const categories = await payload.find({
+      collection: 'categories',
+      sort: 'title',
+    })
 
-  return (
-    <div>
-      <h3 className="text-xs mb-2 text-neutral-500 dark:text-neutral-400">Category</h3>
+    if (!categories.docs || categories.docs.length === 0) {
+      return null
+    }
 
-      <ul>
-        {categories.docs.map((category) => {
-          return (
-            <li key={category.id}>
-              <CategoryItem category={category} />
-            </li>
-          )
-        })}
-      </ul>
-    </div>
-  )
+    return (
+      <div>
+        <h3 className="text-xs mb-2 text-neutral-500 dark:text-neutral-400">Category</h3>
+
+        <ul>
+          {categories.docs.map((category) => {
+            return (
+              <li key={category.id}>
+                <CategoryItem category={category} />
+              </li>
+            )
+          })}
+        </ul>
+      </div>
+    )
+  } catch (error) {
+    console.warn('[CategoryList] Could not fetch categories during build.')
+    return null
+  }
 }
 
 const skeleton = 'mb-3 h-4 w-5/6 animate-pulse rounded'
