@@ -11,6 +11,7 @@ import React from 'react'
 
 import type { Page } from '@/payload-types'
 import { notFound } from 'next/navigation'
+export const dynamic = 'force-dynamic'
 
 export async function generateStaticParams() {
   const payload = await getPayload({ config: configPromise })
