@@ -9,6 +9,7 @@ import { getPayload } from 'payload'
 
 import { CreateAccountForm } from '@/components/forms/CreateAccountForm'
 import { redirect } from 'next/navigation'
+export const dynamic = 'force-dynamic'
 
 export default async function CreateAccount() {
   const headers = await getHeaders()
